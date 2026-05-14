@@ -1,14 +1,16 @@
 export const dynamic = "force-static";
 
+import { BRAND_PROGRAM, BRAND_SHORT, SITE_DESCRIPTION } from "@/lib/brand";
+
 export function GET() {
   const manifest = {
-    name: "Lapor PUPR Cimahi",
-    short_name: "Lapor PUPR",
-    description: "Kanal resmi laporan kerusakan infrastruktur Kota Cimahi.",
+    name: BRAND_PROGRAM,
+    short_name: BRAND_SHORT,
+    description: SITE_DESCRIPTION,
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#1f8a4c",
+    background_color: "#0c1830",
+    theme_color: "#b8860b",
     lang: "id",
     icons: [
       {

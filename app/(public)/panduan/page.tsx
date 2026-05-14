@@ -19,7 +19,7 @@ export default function PanduanPage() {
           wilayah Kota Cimahi.
         </Step>
         <Step icon={<Camera className="h-5 w-5" />} step={2} title="Pilih kategori & foto">
-          Pilih jenis kerusakan (jalan, PJU, drainase, dll), tulis penjelasan singkat,
+          Pilih jenis kerusakan (jalan, drainase, trotoar, dan lainnya sesuai daftar), tulis penjelasan singkat,
           dan unggah 1–3 foto. Foto akan otomatis dikompres agar hemat kuota.
         </Step>
         <Step icon={<MessageCircle className="h-5 w-5" />} step={3} title="Verifikasi WhatsApp">
@@ -27,12 +27,13 @@ export default function PanduanPage() {
           WA untuk verifikasi. Nomor disimpan terenkripsi dan tidak ditampilkan publik.
         </Step>
         <Step icon={<ShieldCheck className="h-5 w-5" />} step={4} title="Kirim & pantau">
-          Setujui kebijakan privasi, lalu kirim. Anda akan mendapat nomor laporan dan
-          notifikasi WA tiap status berubah (diterima / ditolak / selesai).
+          Setujui kebijakan privasi, lalu kirim. Anda mendapat nomor laporan 7 angka dan
+          notifikasi WA tiap status berubah (diterima / ditolak / selesai). Nomor dipakai di menu{" "}
+          <strong className="text-foreground">Cek laporan</strong> di beranda.
         </Step>
       </ol>
 
-      <section className="rounded-xl border bg-muted/30 p-5">
+      <section className="rounded-xl border border-border bg-secondary p-5">
         <h2 className="font-semibold">Tips agar laporan cepat ditindaklanjuti</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
           <li>Foto jelas dan tampak skala kerusakan.</li>
@@ -42,7 +43,7 @@ export default function PanduanPage() {
         </ul>
       </section>
 
-      <section className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+      <section className="rounded-xl border-2 border-primary bg-primary p-5 text-sm text-primary-foreground">
         <p className="font-semibold">Ini bukan kanal darurat.</p>
         <p>
           Untuk kebakaran, longsor, atau kecelakaan, langsung hubungi <strong>112</strong>{" "}
@@ -66,7 +67,7 @@ function Step({
 }) {
   return (
     <li className="flex gap-3 rounded-xl border bg-card p-4">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary bg-secondary text-primary">
         {icon}
       </span>
       <div>

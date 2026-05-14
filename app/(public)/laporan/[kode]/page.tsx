@@ -24,7 +24,7 @@ export default async function ReportDetail({
   params: { kode: string };
   searchParams: { baru?: string };
 }) {
-  const r = await getReportByKode(params.kode.toUpperCase());
+  const r = await getReportByKode(params.kode);
   if (!r) notFound();
 
   const beforePhotos = r.photos.filter((p) => p.kind === "before");
@@ -40,7 +40,7 @@ export default async function ReportDetail({
       </Link>
 
       {searchParams.baru && (
-        <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+        <div className="flex items-start gap-2 rounded-lg border border-border bg-secondary p-3 text-sm text-foreground">
           <CheckCircle2 className="mt-0.5 h-4 w-4" />
           <p>
             Laporan Anda telah masuk. Kami mengirim konfirmasi ke WhatsApp Anda.
@@ -84,7 +84,7 @@ export default async function ReportDetail({
           <InfoBlock label="Pelapor" icon={<Users className="h-4 w-4" />}>
             {r.pelaporNama}
             {r.dukunganCount > 0 && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-primary bg-secondary px-2 py-0.5 text-xs font-medium text-foreground">
                 +{r.dukunganCount} dukungan warga
               </span>
             )}
@@ -103,24 +103,24 @@ export default async function ReportDetail({
       )}
 
       {r.status === "ditolak" && r.rejectedReason && (
-        <Card className="border-rose-200 bg-rose-50">
+        <Card className="border-2 border-primary bg-primary text-primary-foreground">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-rose-900">
+            <CardTitle className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4" /> Alasan Penolakan
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-rose-900">{r.rejectedReason}</CardContent>
+          <CardContent className="text-sm opacity-95">{r.rejectedReason}</CardContent>
         </Card>
       )}
 
       {r.status === "selesai" && r.resolvedNote && (
-        <Card className="border-emerald-200 bg-emerald-50">
+        <Card className="border border-primary bg-secondary">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-emerald-900">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <CheckCircle2 className="h-4 w-4" /> Catatan Tindak Lanjut
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-emerald-900">{r.resolvedNote}</CardContent>
+          <CardContent className="text-sm text-muted-foreground">{r.resolvedNote}</CardContent>
         </Card>
       )}
 

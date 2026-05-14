@@ -10,11 +10,8 @@ export const dynamic = "force-dynamic";
 export default async function LaporPage() {
   const cats = await listCategories();
   return (
-    <div className="container max-w-2xl py-6">
-      <h1 className="mb-2 text-2xl font-bold">Buat Laporan Baru</h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        Ikuti 4 langkah berikut. Total waktu sekitar 2 menit.
-      </p>
+    <div className="container max-w-lg py-4 md:max-w-xl md:py-8">
+      <h1 className="sr-only">Buat laporan</h1>
       <ReportWizard
         categories={cats.map((c) => ({
           slug: c.slug,

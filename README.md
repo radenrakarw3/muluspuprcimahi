@@ -1,6 +1,6 @@
-# Lapor PUPR Cimahi
+# MULUS PUPR Cimahi
 
-Web app pelaporan warga untuk Dinas PUPR Kota Cimahi.
+**MULUS** (*Media Usulan Laporan Umum Sarana*) — web app pelaporan warga untuk Dinas PUPR Kota Cimahi.
 Konsep: peta sebagai antarmuka utama, verifikasi WhatsApp, dan workflow admin
 berbasis status (Diterima / Ditolak / Selesai / Duplikat).
 

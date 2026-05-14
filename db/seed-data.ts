@@ -1,3 +1,5 @@
+import { BRAND_PROGRAM } from "../lib/brand";
+
 /**
  * Data referensi Kota Cimahi (3 kecamatan, 15 kelurahan).
  *
@@ -181,20 +183,12 @@ export const CATEGORIES = [
     urutan: 1,
   },
   {
-    slug: "pju_mati",
-    nama: "Lampu PJU Mati / Rusak",
-    ikon: "lamp",
-    deskripsi: "Penerangan Jalan Umum yang mati, redup, atau rusak.",
-    bidang: "Bidang Penerangan Jalan Umum",
-    urutan: 2,
-  },
-  {
     slug: "drainase",
     nama: "Drainase / Got Mampet",
     ikon: "droplets",
     deskripsi: "Got, selokan, atau saluran air yang mampet atau rusak.",
     bidang: "Bidang Sumber Daya Air",
-    urutan: 3,
+    urutan: 2,
   },
   {
     slug: "trotoar",
@@ -202,7 +196,7 @@ export const CATEGORIES = [
     ikon: "footprints",
     deskripsi: "Trotoar yang rusak, berlubang, atau tertutup.",
     bidang: "Bidang Bina Marga",
-    urutan: 4,
+    urutan: 3,
   },
   {
     slug: "jembatan",
@@ -210,7 +204,7 @@ export const CATEGORIES = [
     ikon: "bridge",
     deskripsi: "Kerusakan struktur jembatan atau pegangannya.",
     bidang: "Bidang Bina Marga",
-    urutan: 5,
+    urutan: 4,
   },
   {
     slug: "taman",
@@ -218,7 +212,7 @@ export const CATEGORIES = [
     ikon: "trees",
     deskripsi: "Kerusakan fasilitas taman, bangku, atau ruang publik.",
     bidang: "Bidang Pertamanan",
-    urutan: 6,
+    urutan: 5,
   },
   {
     slug: "banjir",
@@ -226,7 +220,7 @@ export const CATEGORIES = [
     ikon: "waves",
     deskripsi: "Genangan air atau banjir di jalan/lingkungan.",
     bidang: "Bidang Sumber Daya Air",
-    urutan: 7,
+    urutan: 6,
   },
   {
     slug: "lainnya",
@@ -242,7 +236,7 @@ export const WA_TEMPLATES = [
   {
     key: "otp",
     nama: "Kode OTP Verifikasi",
-    body: `*Lapor PUPR Cimahi*
+    body: `*${BRAND_PROGRAM}*
 
 Kode verifikasi Anda: *{kode}*
 

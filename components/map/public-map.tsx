@@ -15,7 +15,6 @@ import Link from "next/link";
 import {
   CIMAHI_CENTER,
   CIMAHI_DEFAULT_ZOOM,
-  CIMAHI_MAX_BOUNDS,
   OSM_ATTRIBUTION,
   OSM_TILE_URL,
 } from "./constants";
@@ -39,11 +38,34 @@ export type PublicMapReport = {
 
 function FitOnce({ reports }: { reports: PublicMapReport[] }) {
   const map = useMap();
+  const sig = reports.map((r) => `${r.id}:${r.lat},${r.lng}`).join("|");
   useEffect(() => {
     if (!reports.length) return;
-    const bounds = L.latLngBounds(reports.map((r) => [r.lat, r.lng]));
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
-  }, [reports.length, map]);
+    try {
+      if (reports.length === 1) {
+        map.setView([reports[0].lat, reports[0].lng], 15, { animate: false });
+        return;
+      }
+      const bounds = L.latLngBounds(reports.map((r) => [r.lat, r.lng] as [number, number]));
+      if (!bounds.isValid()) return;
+      map.fitBounds(bounds, { padding: [48, 48], maxZoom: 16, animate: false });
+    } catch {
+      map.setView(CIMAHI_CENTER, CIMAHI_DEFAULT_ZOOM, { animate: false });
+    }
+  }, [map, sig, reports.length]);
+  return null;
+}
+
+/** Peta sering render dengan lebar 0 saat `next/dynamic` — invalidate agar tile & pin tampil. */
+function InvalidateSizeOnMount() {
+  const map = useMap();
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      map.invalidateSize();
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [map]);
   return null;
 }
 
@@ -56,6 +78,18 @@ export default function PublicMap({
   className?: string;
   hrefBase?: string;
 }) {
+  const validReports = useMemo(
+    () =>
+      reports.filter(
+        (r) =>
+          Number.isFinite(r.lat) &&
+          Number.isFinite(r.lng) &&
+          Math.abs(r.lat) <= 90 &&
+          Math.abs(r.lng) <= 180,
+      ),
+    [reports],
+  );
+
   const [iconCache] = useState(() => new Map<string, L.DivIcon>());
 
   const getIcon = useMemo(
@@ -74,15 +108,19 @@ export default function PublicMap({
       <MapContainer
         center={CIMAHI_CENTER}
         zoom={CIMAHI_DEFAULT_ZOOM}
-        maxBounds={CIMAHI_MAX_BOUNDS}
         minZoom={11}
+        maxZoom={19}
         scrollWheelZoom
         className="h-full w-full"
       >
         <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
-        <FitOnce reports={reports} />
+        <InvalidateSizeOnMount />
+        <FitOnce reports={validReports} />
         <MarkerClusterGroup
           chunkedLoading
+          removeOutsideVisibleBounds={false}
+          disableClusteringAtZoom={16}
+          spiderfyOnMaxZoom
           iconCreateFunction={(cluster) => {
             const count = cluster.getChildCount();
             const size = count < 10 ? 36 : count < 50 ? 44 : 54;
@@ -93,7 +131,7 @@ export default function PublicMap({
             });
           }}
         >
-          {reports.map((r) => (
+          {validReports.map((r) => (
             <Marker key={r.id} position={[r.lat, r.lng]} icon={getIcon(r.status)}>
               <Popup>
                 <div className="min-w-[200px] space-y-1">
@@ -101,7 +139,7 @@ export default function PublicMap({
                     {r.category_nama}
                   </p>
                   <p className="font-medium leading-tight">{r.kode}</p>
-                  <p className="line-clamp-3 text-sm text-foreground/80">{r.deskripsi}</p>
+                  <p className="line-clamp-3 text-sm text-muted-foreground">{r.deskripsi}</p>
                   <p className="text-xs text-muted-foreground">
                     {STATUS_LABEL[r.status]} • {timeAgo(r.created_at)}
                   </p>

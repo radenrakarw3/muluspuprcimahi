@@ -4,6 +4,9 @@
 export const CIMAHI_CENTER: [number, number] = [-6.872, 107.542];
 export const CIMAHI_DEFAULT_ZOOM = 13;
 
+/** Zoom awal / ikuti GPS — sedekat mungkin dalam tile OSM (biasanya aman sampai 18–19). */
+export const GEO_MAX_ZOOM = 18;
+
 export const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';

@@ -1,51 +1,74 @@
+/* Inter dimuat di browser (bukan saat kompilasi next/font) — menghindari gagal unduh font & halaman tanpa gaya. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&subset=latin,latin-ext&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Palet ketat identitas PUPR: hanya biru tua & kuning (tanpa putih/hitam netral).
+ * Latar = biru tua, teks & aksen utama = kuning. Area kuning memakai teks biru tua.
+ * Semua abu diganti variasi saturasi biru atau kuning.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    /* Pemkot Cimahi accent: hijau */
-    --primary: 142 71% 35%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 142 71% 95%;
-    --accent-foreground: 142 71% 25%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 71% 35%;
+    /* Biru tua (bukan hitam: tetap hue ~220) */
+    --background: 220 72% 9%;
+    --foreground: 48 96% 58%;
+
+    --card: 220 58% 15%;
+    --card-foreground: 48 96% 58%;
+
+    /* Popover/dropdown: lebih pekat dari muted agar tidak terlihat transparan di atas peta */
+    --popover: 220 58% 16%;
+    --popover-foreground: 48 96% 58%;
+
+    /* Tombol utama = kuning, teks di atasnya = biru sangat tua */
+    --primary: 48 100% 52%;
+    --primary-foreground: 220 78% 11%;
+
+    /* Panel sekunder = biru lebih terang */
+    --secondary: 220 48% 22%;
+    --secondary-foreground: 48 96% 58%;
+
+    --muted: 220 42% 19%;
+    --muted-foreground: 48 62% 46%;
+
+    --accent: 220 50% 26%;
+    --accent-foreground: 48 100% 55%;
+
+    /* Aksi “keras” tetap hue kuning (emas gelap), bukan merah */
+    --destructive: 43 100% 38%;
+    --destructive-foreground: 220 78% 11%;
+
+    --border: 48 90% 48%;
+    --input: 220 50% 18%;
+    --ring: 48 100% 55%;
     --radius: 0.75rem;
   }
+
+  /* Satu mode saja — biru + kuning */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142 71% 45%;
+    --background: 220 72% 9%;
+    --foreground: 48 96% 58%;
+    --card: 220 58% 15%;
+    --card-foreground: 48 96% 58%;
+    /* Popover/dropdown: lebih pekat dari muted agar tidak terlihat transparan di atas peta */
+    --popover: 220 58% 16%;
+    --popover-foreground: 48 96% 58%;
+    --primary: 48 100% 52%;
+    --primary-foreground: 220 78% 11%;
+    --secondary: 220 48% 22%;
+    --secondary-foreground: 48 96% 58%;
+    --muted: 220 42% 19%;
+    --muted-foreground: 48 62% 46%;
+    --accent: 220 50% 26%;
+    --accent-foreground: 48 100% 55%;
+    --destructive: 43 100% 38%;
+    --destructive-foreground: 220 78% 11%;
+    --border: 48 90% 48%;
+    --input: 220 50% 18%;
+    --ring: 48 100% 55%;
   }
 }
 
@@ -57,27 +80,79 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: hsl(var(--primary));
+  }
 }
 
-/* Leaflet overrides */
+/* Leaflet — tanpa popup putih */
 .leaflet-container {
   width: 100%;
   height: 100%;
   z-index: 0;
+  background: hsl(var(--background)) !important;
 }
 
 .leaflet-pin {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 2px 4px hsl(220 65% 6% / 0.55));
+}
+
+/* Pastikan warna status pin tidak tertimpa gaya global / cluster */
+.report-map-pin {
+  line-height: 0;
+}
+.report-map-pin .leaflet-pin path:first-of-type {
+  fill: var(--report-pin-fill) !important;
+}
+.report-map-pin .leaflet-pin circle {
+  fill: #0f172a !important;
 }
 
 .cluster-marker {
-  background: hsl(142 71% 35%);
-  color: white;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 3px solid hsl(var(--foreground));
+  box-shadow: 0 2px 6px hsl(220 70% 6% / 0.55);
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+
+.leaflet-popup-tip {
+  border-top: none !important;
+  border-left: none !important;
+}
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: hsl(220 55% 22%) !important;
+  border: 2px solid hsl(var(--primary)) !important;
+}
+
+/* Angka cluster custom dari PublicMap — specificity tinggi agar tidak tertimpa aturan lain */
+.marker-cluster-small div.cluster-marker,
+.marker-cluster-medium div.cluster-marker,
+.marker-cluster-large div.cluster-marker {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: 3px solid hsl(var(--foreground)) !important;
+  box-shadow: 0 2px 6px hsl(220 70% 6% / 0.55);
 }

@@ -3,11 +3,11 @@
  *
  * Alur:
  * 1. Validasi Zod & captcha.
- * 2. Verifikasi OTP terhadap nomor WA (dan tandai sebagai used).
+ * 2. Verifikasi OTP terhadap nomor WA (baru ditandai used setelah simpan sukses).
  * 3. Cek geofencing (harus dalam boundary Cimahi).
  * 4. Cek rate limit harian.
- * 5. Reverse geocode kecamatan/kelurahan via PostGIS.
- * 6. Insert reports + photos + status_history (transaksi via batch).
+ * 5. Kecamatan/kelurahan dari input warga (dropdown), sudah divalidasi Zod.
+ * 6. Insert reports + photos + status_history (bila gagal, baris laporan dihapus).
  * 7. Kirim notifikasi "report_received" via Starsender.
  *
  * Bila `parentReportId` di-set, ini bukan laporan baru melainkan dukungan
@@ -32,14 +32,19 @@ import {
   isValidIdWa,
   normalizeWa,
 } from "@/lib/encryption";
-import { findRegionContaining, generateReportCode, isInsideCimahi } from "@/lib/geo";
+import { isInsideCimahi } from "@/lib/geo";
 import { rateLimitWaDaily } from "@/lib/rate-limit";
 import { reportSubmitSchema } from "@/lib/validation";
 import { notify } from "@/lib/wa-notify";
 import { categories } from "@/db/schema";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { randomInt } from "node:crypto";
 
 export const runtime = "nodejs";
+
+function randomReportCode7(): string {
+  return String(randomInt(0, 10_000_000)).padStart(7, "0");
+}
 
 function getIp(req: Request): string {
   return (
@@ -53,10 +58,12 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const parsed = reportSubmitSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.errors[0]?.message ?? "Input tidak valid" },
-      { status: 400 },
-    );
+    const msg =
+      parsed.error.flatten().fieldErrors.fotoUrls?.[0] ??
+      parsed.error.flatten().fieldErrors.fotoKeys?.[0] ??
+      parsed.error.errors[0]?.message ??
+      "Input tidak valid";
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
   const data = parsed.data;
 
@@ -106,7 +113,7 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  await db.update(waOtp).set({ usedAt: new Date() }).where(eq(waOtp.id, otp[0].id));
+  const otpId = otp[0].id;
 
   // Rate limit
   const rl = await rateLimitWaDaily(waHash);
@@ -127,9 +134,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Kategori tidak dikenal." }, { status: 400 });
   }
 
-  // Reverse-geocode kecamatan/kelurahan
-  const region = await findRegionContaining(data.lat, data.lng);
-
   // Branch: support laporan eksisting
   if (data.parentReportId) {
     const parent = (
@@ -141,55 +145,83 @@ export async function POST(req: Request) {
         { status: 404 },
       );
     }
-    await db
+    const insertedSupport = await db
       .insert(supports)
       .values({ reportId: parent.id, waHash })
-      .onConflictDoNothing();
-    await db
-      .update(reports)
-      .set({ dukunganCount: sql`${reports.dukunganCount} + 1` })
-      .where(eq(reports.id, parent.id));
+      .onConflictDoNothing()
+      .returning({ reportId: supports.reportId });
+    // Hanya naikkan counter bila baris dukungan baru benar-benar tercatat (bukan duplikat WA yang sama).
+    if (insertedSupport.length > 0) {
+      await db
+        .update(reports)
+        .set({ dukunganCount: sql`${reports.dukunganCount} + 1` })
+        .where(eq(reports.id, parent.id));
+    }
+    await db.update(waOtp).set({ usedAt: new Date() }).where(eq(waOtp.id, otpId));
     return NextResponse.json({ ok: true, kode: parent.kode, supported: true });
   }
 
-  // Insert laporan baru
+  // Insert laporan baru — nomor 7 digit acak, pastikan unik di DB
   const id = nanoid(16);
-  const kode = generateReportCode();
+  let kode = "";
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const candidate = randomReportCode7();
+    const clash = await db.select({ id: reports.id }).from(reports).where(eq(reports.kode, candidate)).limit(1);
+    if (clash.length === 0) {
+      kode = candidate;
+      break;
+    }
+  }
+  if (!kode) {
+    return NextResponse.json(
+      { error: "Gagal membuat nomor laporan. Silakan coba lagi sebentar lagi." },
+      { status: 503 },
+    );
+  }
   const ipHash = hashIp(getIp(req));
 
-  // Insert raw SQL untuk geom (Drizzle belum native untuk geometry).
-  await db.execute(sql`
-    INSERT INTO reports (
-      id, kode, category_id, deskripsi, status, lat, lng, geom,
-      alamat, kecamatan, kelurahan, rw, rt,
-      pelapor_nama, pelapor_wa_hash, pelapor_wa_enc, ip_hash, created_at, updated_at
-    ) VALUES (
-      ${id}, ${kode}, ${cat.id}, ${data.deskripsi}, 'baru', ${String(data.lat)}, ${String(data.lng)},
-      ST_SetSRID(ST_MakePoint(${data.lng}, ${data.lat}), 4326),
-      ${data.alamat ?? null}, ${region.kecamatan ?? null}, ${region.kelurahan ?? null},
-      ${data.rw ?? null}, ${data.rt ?? null},
-      ${data.pelaporNama}, ${waHash}, ${encryptWa(wa)}, ${ipHash}, now(), now()
-    )
-  `);
+  try {
+    // Insert raw SQL untuk geom (Drizzle belum native untuk geometry).
+    await db.execute(sql`
+      INSERT INTO reports (
+        id, kode, category_id, deskripsi, status, lat, lng, geom,
+        alamat, kecamatan, kelurahan, rw, rt,
+        pelapor_nama, pelapor_wa_hash, pelapor_wa_enc, ip_hash, created_at, updated_at
+      ) VALUES (
+        ${id}, ${kode}, ${cat.id}, ${data.deskripsi}, 'baru', ${String(data.lat)}, ${String(data.lng)},
+        ST_SetSRID(ST_MakePoint(${data.lng}, ${data.lat}), 4326),
+        ${data.alamat ?? null}, ${data.kecamatan}, ${data.kelurahan},
+        ${data.rw}, ${data.rt},
+        ${data.pelaporNama}, ${waHash}, ${encryptWa(wa)}, ${ipHash}, now(), now()
+      )
+    `);
 
-  // Foto (URL yang sudah ter-upload ke R2 di tahap presign)
-  for (const url of data.fotoUrls) {
-    await db.insert(reportPhotos).values({
+    for (const url of data.fotoUrls) {
+      await db.insert(reportPhotos).values({
+        id: nanoid(16),
+        reportId: id,
+        url,
+        kind: "before",
+      });
+    }
+
+    await db.insert(reportStatusHistory).values({
       id: nanoid(16),
       reportId: id,
-      url,
-      kind: "before",
+      fromStatus: null,
+      toStatus: "baru",
+      alasan: "Laporan masuk dari warga",
     });
+  } catch (e) {
+    console.error("[reports POST] simpan DB gagal:", e);
+    await db.delete(reports).where(eq(reports.id, id));
+    return NextResponse.json(
+      { error: "Gagal menyimpan laporan ke basis data. Silakan coba lagi." },
+      { status: 500 },
+    );
   }
 
-  // Status history awal
-  await db.insert(reportStatusHistory).values({
-    id: nanoid(16),
-    reportId: id,
-    fromStatus: null,
-    toStatus: "baru",
-    alasan: "Laporan masuk dari warga",
-  });
+  await db.update(waOtp).set({ usedAt: new Date() }).where(eq(waOtp.id, otpId));
 
   // Notifikasi konfirmasi ke warga
   const appUrl = process.env.APP_URL ?? "";

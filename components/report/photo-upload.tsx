@@ -95,7 +95,7 @@ export default function PhotoUpload({
             <button
               type="button"
               onClick={() => removeAt(i)}
-              className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white"
+              className="absolute right-1 top-1 rounded-full border border-primary bg-card p-1 text-foreground"
               aria-label="Hapus foto"
             >
               <X className="h-3.5 w-3.5" />

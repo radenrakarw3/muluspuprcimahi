@@ -60,7 +60,10 @@ export async function acceptReport(input: { reportId: string }) {
   const { reportId } = parsed.data;
 
   const { r, cnama } = await loadReport(reportId);
-  if (r.status !== "baru") throw new Error("Hanya laporan 'baru' yang bisa diterima.");
+  if (r.status !== "baru")
+    throw new Error(
+      'Laporan ini sudah tidak berstatus "baru" (mungkin sudah diterima). Muat ulang halaman.',
+    );
 
   await db
     .update(reports)
@@ -88,9 +91,11 @@ export async function acceptReport(input: { reportId: string }) {
     },
   });
 
-  revalidatePath(`/admin/laporan/${reportId}`);
-  revalidatePath(`/admin`);
+  revalidatePath(`/admin/laporan/${r.kode}`);
+  revalidatePath("/admin/laporan");
+  revalidatePath("/admin");
   revalidatePath(`/laporan/${r.kode}`);
+  revalidatePath("/");
 }
 
 export async function rejectReport(input: { reportId: string; alasan: string }) {
@@ -132,9 +137,11 @@ export async function rejectReport(input: { reportId: string; alasan: string }) 
     },
   });
 
-  revalidatePath(`/admin/laporan/${reportId}`);
-  revalidatePath(`/admin`);
+  revalidatePath(`/admin/laporan/${r.kode}`);
+  revalidatePath("/admin/laporan");
+  revalidatePath("/admin");
   revalidatePath(`/laporan/${r.kode}`);
+  revalidatePath("/");
 }
 
 export async function duplicateReport(input: {
@@ -186,8 +193,13 @@ export async function duplicateReport(input: {
     },
   });
 
-  revalidatePath(`/admin/laporan/${reportId}`);
-  revalidatePath(`/admin`);
+  revalidatePath(`/admin/laporan/${r.kode}`);
+  revalidatePath(`/admin/laporan/${parent.kode}`);
+  revalidatePath("/admin/laporan");
+  revalidatePath("/admin");
+  revalidatePath(`/laporan/${r.kode}`);
+  revalidatePath(`/laporan/${parent.kode}`);
+  revalidatePath("/");
 }
 
 export async function resolveReport(input: {
@@ -248,7 +260,9 @@ export async function resolveReport(input: {
     },
   });
 
-  revalidatePath(`/admin/laporan/${reportId}`);
-  revalidatePath(`/admin`);
+  revalidatePath(`/admin/laporan/${r.kode}`);
+  revalidatePath("/admin/laporan");
+  revalidatePath("/admin");
   revalidatePath(`/laporan/${r.kode}`);
+  revalidatePath("/");
 }

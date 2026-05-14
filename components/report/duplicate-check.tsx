@@ -19,23 +19,18 @@ export default function DuplicateCheck({
   if (items.length === 0) return null;
 
   return (
-    <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+    <div className="space-y-3 rounded-xl border-2 border-primary bg-primary p-4 text-primary-foreground">
       <div className="flex items-start gap-2">
-        <Users className="mt-0.5 h-5 w-5 text-amber-700" />
+        <Users className="mt-0.5 h-5 w-5 shrink-0" />
         <div className="flex-1">
-          <h3 className="font-semibold text-amber-900">
-            Laporan serupa ditemukan di dekat lokasi Anda
-          </h3>
-          <p className="text-sm text-amber-800">
-            Daripada bikin laporan baru, Anda bisa <strong>mendukung</strong> laporan yang
-            sudah ada agar tim PUPR lebih cepat menindaklanjuti.
-          </p>
+          <h3 className="font-semibold">Ada laporan dekat sini</h3>
+          <p className="text-sm opacity-95">Dukung yang sudah ada, atau lanjut buat baru.</p>
         </div>
       </div>
 
       <ul className="space-y-2">
         {items.map((it) => (
-          <li key={it.id} className="rounded-lg border bg-white p-3">
+          <li key={it.id} className="rounded-lg border border-primary-foreground/30 bg-card p-3 text-card-foreground">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="font-mono font-semibold text-foreground">{it.kode}</span>
               <span>•</span>
@@ -49,22 +44,22 @@ export default function DuplicateCheck({
               <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <MapPin className="h-3 w-3" /> ±{Math.round(it.jarak_meter)}m dari titik Anda
                 {it.dukungan_count > 0 && (
-                  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-900">
+                  <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-primary bg-secondary px-2 py-0.5 font-medium text-foreground">
                     <Users className="h-3 w-3" /> {it.dukungan_count} dukungan
                   </span>
                 )}
               </span>
-              <Button size="sm" type="button" onClick={() => onSupport(it.id)}>
-                Dukung laporan ini
+              <Button size="sm" type="button" variant="secondary" onClick={() => onSupport(it.id)}>
+                Dukung
               </Button>
             </div>
           </li>
         ))}
       </ul>
 
-      <div className="flex justify-end border-t border-amber-200 pt-3">
+      <div className="flex justify-end border-t border-primary-foreground/25 pt-3">
         <Button type="button" variant="ghost" size="sm" onClick={onContinue}>
-          Tetap buat laporan baru
+          Tetap baru
         </Button>
       </div>
     </div>

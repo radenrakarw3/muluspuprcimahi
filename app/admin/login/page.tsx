@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BRAND_PROGRAM } from "@/lib/brand";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, MapPinned } from "lucide-react";
@@ -36,17 +37,17 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-muted/30 px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm space-y-4 rounded-2xl border bg-background p-6 shadow-sm"
+        className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-6 shadow-lg ring-1 ring-primary/20"
       >
         <div className="flex items-center gap-2">
           <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <MapPinned className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold">Lapor PUPR Cimahi</p>
+            <p className="text-sm font-semibold">{BRAND_PROGRAM}</p>
             <p className="text-xs text-muted-foreground">Panel Admin</p>
           </div>
         </div>
@@ -76,7 +77,7 @@ export default function AdminLoginPage() {
         </div>
 
         {error && (
-          <p className="rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-800">
+          <p className="rounded-lg border border-primary bg-destructive p-2 text-sm text-destructive-foreground">
             {error}
           </p>
         )}

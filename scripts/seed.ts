@@ -46,6 +46,12 @@ async function main() {
   }
   console.log(`  ✓ ${CATEGORIES.length} kategori`);
 
+  await db
+    .update(schema.categories)
+    .set({ aktif: false })
+    .where(eq(schema.categories.slug, "pju_mati"));
+  console.log("  • Kategori pju_mati dinonaktifkan (PJU bukan lingkup PUPR)");
+
   console.log("• Seed regions (kota, kecamatan, kelurahan)...");
   for (const r of REGIONS) {
     const wkt = bboxToMultiPolygonWKT(r.bbox);

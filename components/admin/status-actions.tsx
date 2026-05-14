@@ -26,9 +26,11 @@ import type { ReportStatusValue } from "@/db/schema";
 
 export default function StatusActions({
   reportId,
+  reportKode,
   status,
 }: {
   reportId: string;
+  reportKode: string;
   status: ReportStatusValue;
 }) {
   const router = useRouter();
@@ -111,10 +113,14 @@ export default function StatusActions({
       <ResolveDialog
         open={resolveOpen}
         onOpenChange={setResolveOpen}
-        reportKode={reportId}
-        onSubmit={(catatan, fotoAfterUrl) =>
-          run(() => resolveReport({ reportId, catatan, fotoAfterUrl }))
-        }
+        reportKode={reportKode}
+        onConfirm={async (catatan, fotoAfterUrl) => {
+          await resolveReport({ reportId, catatan, fotoAfterUrl });
+        }}
+        onResolved={() => {
+          setError(null);
+          router.refresh();
+        }}
       />
       <DuplicateDialog
         open={dupOpen}
@@ -180,16 +186,19 @@ function ResolveDialog({
   open,
   onOpenChange,
   reportKode,
-  onSubmit,
+  onConfirm,
+  onResolved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   reportKode: string;
-  onSubmit: (catatan: string, fotoAfterUrl: string) => void;
+  onConfirm: (catatan: string, fotoAfterUrl: string) => Promise<void>;
+  onResolved?: () => void;
 }) {
   const [catatan, setCatatan] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   async function upload(file: File) {
@@ -270,18 +279,31 @@ function ResolveDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             Batal
           </Button>
           <Button
-            disabled={!photoUrl || catatan.length < 5 || busy}
-            onClick={() => {
+            disabled={!photoUrl || catatan.length < 5 || busy || saving}
+            onClick={async () => {
               if (!photoUrl) return;
-              onSubmit(catatan, photoUrl);
-              onOpenChange(false);
+              setSaving(true);
+              setErr(null);
+              try {
+                await onConfirm(catatan, photoUrl);
+                onOpenChange(false);
+                onResolved?.();
+              } catch (e) {
+                setErr(e instanceof Error ? e.message : "Gagal menyimpan status selesai.");
+              } finally {
+                setSaving(false);
+              }
             }}
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Selesaikan"}
+            {saving || busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Selesaikan"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -305,14 +327,14 @@ function DuplicateDialog({
         <DialogHeader>
           <DialogTitle>Gabungkan ke laporan lain</DialogTitle>
           <DialogDescription>
-            Masukkan kode laporan asal (mis. <code>CMH-202605-1234</code>). Laporan ini
+            Masukkan nomor laporan asal (7 digit, mis. <code>0458921</code>). Laporan ini
             akan ditandai sebagai duplikat.
           </DialogDescription>
         </DialogHeader>
         <Input
           value={kode}
           onChange={(e) => setKode(e.target.value.toUpperCase())}
-          placeholder="CMH-202605-1234"
+          placeholder="0458921"
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

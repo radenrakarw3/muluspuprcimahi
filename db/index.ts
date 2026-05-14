@@ -11,10 +11,25 @@ type DB = ReturnType<typeof drizzle<typeof schema>>;
 let _db: DB | null = null;
 
 function makeDb(): DB {
-  const connectionString = process.env.DATABASE_URL;
+  // Neon / Railway / Vercel kadang pakai nama variabel berbeda
+  const connectionString = (
+    process.env.DATABASE_URL ??
+    process.env.POSTGRES_URL ??
+    process.env.POSTGRES_PRISMA_URL ??
+    ""
+  ).trim();
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL belum di-set. Salin .env.example ke .env.local dan isi connection Neon Anda.",
+      [
+        "DATABASE_URL belum diisi (atah hanya kutip kosong).",
+        "",
+        "1) Buka https://console.neon.tech → project Anda → Connection details",
+        "2) Pilih tab \"Pooled\" / connection string dengan -pooler. di host",
+        "3) Di root proyek, buat/edit .env.local (disarankan) atau .env dengan:",
+        '   DATABASE_URL="postgresql://USER:PASS@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require"',
+        "",
+        "Hapus baris DATABASE_URL=\"\" jika ada — string kosong tidak dihitung valid.",
+      ].join("\n"),
     );
   }
   const sql = neon(connectionString);

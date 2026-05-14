@@ -1,3 +1,5 @@
+import { BRAND_PROGRAM } from "@/lib/brand";
+
 export const metadata = { title: "Kebijakan Privasi" };
 
 export default function PrivasiPage() {
@@ -11,7 +13,7 @@ export default function PrivasiPage() {
       </header>
 
       <p>
-        Aplikasi <strong>Lapor PUPR Cimahi</strong> mematuhi Undang-Undang Nomor 27
+        Aplikasi <strong>{BRAND_PROGRAM}</strong> mematuhi Undang-Undang Nomor 27
         Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP). Berikut penjelasan
         bagaimana kami mengumpulkan, menggunakan, dan melindungi data Anda.
       </p>
@@ -24,7 +26,7 @@ export default function PrivasiPage() {
           </li>
           <li>
             <strong>Lokasi laporan:</strong> koordinat GPS / titik pada peta,
-            kecamatan, kelurahan, RT/RW (jika diisi).
+            kecamatan, kelurahan, RT/RW,
           </li>
           <li>
             <strong>Konten laporan:</strong> deskripsi kerusakan dan foto.

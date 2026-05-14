@@ -99,13 +99,3 @@ export async function findNearbyActiveReports(
   return res.rows ?? (res as unknown as NearbyReport[]);
 }
 
-/**
- * Generate kode laporan unik publik: CMH-YYYYMM-XXXX
- * Counter di-derive dari jumlah laporan + nanoid pendek (kolisi minimal).
- */
-export function generateReportCode(): string {
-  const d = new Date();
-  const ym = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
-  const rand = Math.floor(1000 + Math.random() * 9000).toString();
-  return `CMH-${ym}-${rand}`;
-}

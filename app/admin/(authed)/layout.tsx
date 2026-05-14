@@ -1,14 +1,16 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
   LogOut,
-  MapPinned,
+  Map,
   ScrollText,
   Settings2,
   ShieldCheck,
   Users,
 } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
+import { BRAND_SHORT } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 
@@ -22,20 +24,24 @@ export default async function AuthedAdminLayout({
 
   return (
     <div className="flex min-h-dvh">
-      <aside className="hidden w-60 shrink-0 border-r bg-muted/30 p-4 md:flex md:flex-col">
+      <aside className="hidden w-60 shrink-0 border-r border-primary/30 bg-card p-4 md:flex md:flex-col">
         <Link href="/admin" className="mb-6 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MapPinned className="h-5 w-5" />
-          </span>
+          <Image
+            src="/logo-pupr.png"
+            alt="PUPR"
+            width={36}
+            height={36}
+            className="h-9 w-auto shrink-0 object-contain"
+          />
           <div>
-            <p className="text-sm font-semibold">Lapor PUPR</p>
+            <p className="text-sm font-semibold">{BRAND_SHORT}</p>
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
               Panel Admin
             </p>
           </div>
         </Link>
         <nav className="space-y-1 text-sm">
-          <SidebarLink href="/admin" icon={<MapPinned className="h-4 w-4" />}>
+          <SidebarLink href="/admin" icon={<Map className="h-4 w-4" />}>
             Peta &amp; Laporan
           </SidebarLink>
           <SidebarLink href="/admin/laporan" icon={<ScrollText className="h-4 w-4" />}>

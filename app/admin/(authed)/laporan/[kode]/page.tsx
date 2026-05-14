@@ -19,7 +19,7 @@ export default async function AdminReportDetail({
 }: {
   params: { kode: string };
 }) {
-  const r = await getReportByKode(params.kode.toUpperCase());
+  const r = await getReportByKode(params.kode);
   if (!r) notFound();
 
   // Ambil nomor WA terenkripsi untuk admin
@@ -117,22 +117,22 @@ export default async function AdminReportDetail({
           )}
 
           {r.rejectedReason && (
-            <Card className="border-rose-200 bg-rose-50">
+            <Card className="border-2 border-primary bg-primary text-primary-foreground">
               <CardHeader className="pb-2">
-                <CardTitle className="text-rose-900">Alasan penolakan</CardTitle>
+                <CardTitle>Alasan penolakan</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-rose-900">
+              <CardContent className="text-sm opacity-95">
                 {r.rejectedReason}
               </CardContent>
             </Card>
           )}
 
           {r.resolvedNote && (
-            <Card className="border-emerald-200 bg-emerald-50">
+            <Card className="border border-primary bg-secondary">
               <CardHeader className="pb-2">
-                <CardTitle className="text-emerald-900">Catatan tindak lanjut</CardTitle>
+                <CardTitle className="text-foreground">Catatan tindak lanjut</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-emerald-900">
+              <CardContent className="text-sm text-muted-foreground">
                 {r.resolvedNote}
               </CardContent>
             </Card>
@@ -169,7 +169,7 @@ export default async function AdminReportDetail({
         </div>
 
         <aside className="space-y-4">
-          <StatusActions reportId={r.id} status={r.status} />
+          <StatusActions reportId={r.id} reportKode={r.kode} status={r.status} />
         </aside>
       </div>
     </div>

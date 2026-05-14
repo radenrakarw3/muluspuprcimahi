@@ -1,67 +1,38 @@
 import Link from "next/link";
+import { BRAND_SHORT } from "@/lib/brand";
 
 export default function SiteFooter() {
   return (
-    <footer className="mt-12 border-t bg-muted/30">
-      <div className="container grid gap-6 py-8 sm:grid-cols-3">
-        <div>
-          <p className="text-sm font-semibold">Lapor PUPR Cimahi</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Kanal resmi pelaporan kerusakan infrastruktur Kota Cimahi.
-          </p>
-          <p className="mt-3 text-xs text-muted-foreground">
-            <strong>Bukan kanal darurat.</strong> Untuk kebakaran, longsor, atau
-            kecelakaan: hubungi 112.
-          </p>
-        </div>
-        <div className="text-sm">
-          <p className="mb-2 font-medium">Tautan</p>
-          <ul className="space-y-1 text-muted-foreground">
-            <li>
-              <Link href="/" className="hover:text-foreground">
-                Peta Laporan
-              </Link>
-            </li>
-            <li>
-              <Link href="/panduan" className="hover:text-foreground">
-                Panduan Melapor
-              </Link>
-            </li>
-            <li>
-              <Link href="/tentang" className="hover:text-foreground">
-                Tentang
-              </Link>
-            </li>
-            <li>
-              <Link href="/privasi" className="hover:text-foreground">
-                Kebijakan Privasi
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="text-sm">
-          <p className="mb-2 font-medium">Kontak</p>
-          <ul className="space-y-1 text-muted-foreground">
-            <li>Dinas PUPR Kota Cimahi</li>
-            <li>Jl. Demang Hardjakusumah, Cimahi</li>
-            <li>pupr@cimahikota.go.id</li>
-          </ul>
-        </div>
-      </div>
-      <div className="border-t bg-background/50">
-        <div className="container flex flex-wrap items-center justify-between gap-2 py-3 text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Pemerintah Kota Cimahi.</p>
-          <p>
-            Dikembangkan oleh{" "}
-            <a
-              href="https://rw3labs.id"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-foreground hover:text-primary"
-            >
-              RW3Labs
-            </a>
-          </p>
+    <footer className="mt-auto border-t border-primary/40 bg-secondary/80">
+      <div className="container space-y-4 py-6">
+        <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          <Link href="/cek-laporan" className="hover:text-foreground">
+            Cek laporan
+          </Link>
+          <Link href="/panduan" className="hover:text-foreground">
+            Panduan
+          </Link>
+          <Link href="/tentang" className="hover:text-foreground">
+            Tentang
+          </Link>
+          <Link href="/privasi" className="hover:text-foreground">
+            Privasi
+          </Link>
+        </nav>
+        <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+          Bukan nomor darurat. Kebakaran atau kecelakaan: hubungi{" "}
+          <strong className="text-foreground">112</strong>.
+        </p>
+        <div className="flex flex-col items-center justify-between gap-2 border-t border-primary/25 pt-4 text-[11px] text-muted-foreground sm:flex-row">
+          <span>&copy; {new Date().getFullYear()} Pemkot Cimahi · {BRAND_SHORT}</span>
+          <a
+            href="https://rw3labs.id"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-foreground"
+          >
+            RW3Labs
+          </a>
         </div>
       </div>
     </footer>

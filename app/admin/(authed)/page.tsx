@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { CheckCircle2, Clock, ScrollText, Megaphone, ShieldAlert } from "lucide-react";
+import { AdminDashboardPanel } from "@/components/admin/admin-dashboard-panel";
 import { PublicMap } from "@/components/map/loaders";
-import { listReportsForMap, reportsAdminStats } from "@/lib/queries";
+import { auth } from "@/lib/auth";
+import { getAdminDashboardInsights, listReportsForMap, reportsAdminStats } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,7 @@ export default async function AdminDashboard({
 }: {
   searchParams: { status?: string };
 }) {
+  const session = await auth();
   const status = searchParams.status as
     | "baru"
     | "diterima"
@@ -22,6 +25,8 @@ export default async function AdminDashboard({
     listReportsForMap({ status: status ? [status] : undefined, limit: 2000 }),
     reportsAdminStats(),
   ]);
+  const insights = await getAdminDashboardInsights(stats);
+  const showWaTemplateLink = session?.user.role === "super_admin";
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -29,7 +34,7 @@ export default async function AdminDashboard({
         <div>
           <h1 className="text-2xl font-bold">Peta &amp; Laporan</h1>
           <p className="text-sm text-muted-foreground">
-            Klik pin untuk detail. Filter status di kartu di atas peta.
+            Ringkasan angka di bawah; filter status lewat kartu, lalu tinjau posisi di peta.
           </p>
         </div>
         <Link
@@ -39,6 +44,12 @@ export default async function AdminDashboard({
           <ScrollText className="h-4 w-4" /> Lihat sebagai daftar
         </Link>
       </header>
+
+      <AdminDashboardPanel
+        stats={stats}
+        insights={insights}
+        showWaTemplateLink={showWaTemplateLink}
+      />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         <StatusCard
@@ -108,18 +119,18 @@ function StatusCard({
   tone: "default" | "info" | "success" | "warning" | "danger";
 }) {
   const toneMap: Record<string, string> = {
-    default: "border-slate-200 bg-slate-50",
-    info: "border-blue-200 bg-blue-50",
-    success: "border-emerald-200 bg-emerald-50",
-    warning: "border-amber-200 bg-amber-50",
-    danger: "border-rose-200 bg-rose-50",
+    default: "border-border bg-card text-foreground",
+    info: "border-border bg-secondary text-foreground",
+    success: "border-2 border-primary bg-primary text-primary-foreground",
+    warning: "border-2 border-primary bg-secondary text-foreground",
+    danger: "border-2 border-primary bg-destructive text-destructive-foreground",
   };
   return (
     <Link
       href={href}
       className={`rounded-xl border p-3 ${toneMap[tone]} ${active ? "ring-2 ring-primary" : ""}`}
     >
-      <div className="flex items-center gap-2 text-xs">
+      <div className="flex items-center gap-2 text-xs opacity-90">
         {icon} {label}
       </div>
       <p className="mt-1 text-2xl font-bold">{value.toLocaleString("id-ID")}</p>
